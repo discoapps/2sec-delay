@@ -1,0 +1,94 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>App</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap");
+
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .container {
+        text-align: center;
+        padding: 50px;
+        color: #fff;
+      }
+
+      .message {
+        display: block;
+        font-size: 40px;
+        margin-bottom: 60px;
+        transition: opacity 0.5s ease-in-out;
+      }
+
+      .message:last-child {
+        margin-bottom: 0;
+      }
+    </style>
+    <script type="text/javascript">
+      let parentWindow = {};
+      let recentMessages = [];
+
+      window.onload = () => {
+        parentWindow = window.parent || window.top;
+
+        // Init method
+        if (parentWindow) {
+          parentWindow.postMessage(
+            {
+              method: "init",
+              value: ["phrase"],
+            },
+            "*"
+          );
+        }
+      };
+
+      window.addEventListener("message", function (e) {
+        // Get the sent data
+        if (e.data && e.data.datatype) {
+          switch (e.data.datatype) {
+            case "phrase":
+              recentMessages.unshift(e.data.payload);
+
+              // Keep only the last three messages
+              if (recentMessages.length > 3) {
+                recentMessages.pop();
+              }
+
+              updateContainerWithDelay();
+              break;
+          }
+        }
+      });
+
+      function updateContainerWithDelay() {
+        // Delay the update by 2 seconds
+        setTimeout(() => {
+          updateContainer();
+        }, 2000);
+      }
+
+      function updateContainer() {
+        let strel = document.getElementById("cont");
+        strel.innerHTML = recentMessages
+          .map((message, index) => {
+            const fontSize = 40 - index * 10; // Decrease font size for each previous message
+            const opacity = 1 - index * 0.4; // Decrease opacity for each previous message
+
+            return `<span class="message" style="font-size: ${fontSize}px; opacity: ${opacity};">${message}</span>`;
+          })
+          .join("");
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="container" id="cont"></div>
+  </body>
+</html>
